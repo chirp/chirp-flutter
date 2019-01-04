@@ -1,0 +1,21 @@
+name: chirpsdk
+description: Send and receive data using sound
+version: 0.0.1
+author: Asio Ltd
+homepage: https://developers.chirp.io
+
+environment:
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    androidPackage: io.chirp.chirpsdk
+    pluginClass: ChirpsdkPlugin
