@@ -18,6 +18,9 @@ rootProject.allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://maven.chirp.io/release"
+        }
     }
 }
 
@@ -41,6 +44,5 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.squareup.okhttp3:okhttp:3.12.0"
-    implementation files("libs/chirp-connect-release.aar")
+    implementation 'io.chirp:chirpsdk:3.6.0-beta'
 }

@@ -12,14 +12,12 @@ A new flutter plugin project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Asio Ltd' => 'developers@chirp.io' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files     = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
-  s.dependency 'Flutter'
+  s.dependency         'Flutter'
+  s.dependency         'ChirpSDK'
 
+  s.static_framework      = true
   s.ios.deployment_target = '8.0'
-
-  s.preserve_paths = 'ChirpConnect.framework'
-  s.xcconfig = { 'OTHER_LDFLAGS' => '-framework ChirpConnect' }
-  s.vendored_frameworks = 'ChirpConnect.framework'
 end
 

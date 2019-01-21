@@ -1,7 +1,7 @@
 name: chirpsdk
 description: Send and receive data using sound
 version: 0.0.1
-author: Asio Ltd
+author: Asio Ltd <developers@chirp.io>
 homepage: https://developers.chirp.io
 
 environment:

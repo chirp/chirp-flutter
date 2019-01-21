@@ -7,12 +7,15 @@ environment:
 
 dependencies:
   simple_permissions: ^0.1.9
+
   flutter:
     sdk: flutter
 
   cupertino_icons: ^0.1.2
 
 dev_dependencies:
+  simple_permissions: ^0.1.9
+
   flutter_test:
     sdk: flutter
 
