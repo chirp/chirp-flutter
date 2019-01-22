@@ -6,16 +6,14 @@ environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
-  simple_permissions: ^0.1.9
-
   flutter:
     sdk: flutter
+
+  simple_permissions: ^0.1.9
 
   cupertino_icons: ^0.1.2
 
 dev_dependencies:
-  simple_permissions: ^0.1.9
-
   flutter_test:
     sdk: flutter
 
