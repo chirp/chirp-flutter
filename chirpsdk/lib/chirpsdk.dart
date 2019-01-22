@@ -19,7 +19,6 @@ class ChirpSDK {
   static const EventChannel _sentEvents = const EventChannel('chirp.io/events/sent');
   static const EventChannel _receivingEvents = const EventChannel('chirp.io/events/receiving');
   static const EventChannel _receivedEvents = const EventChannel('chirp.io/events/received');
-  static const EventChannel _volumeEvents = const EventChannel('chirp.io/events/volume');
   static const EventChannel _errorEvents = const EventChannel('chirp.io/events/errors');
 
   /// Initialise the ChirpSDK
@@ -28,9 +27,9 @@ class ChirpSDK {
   /// up for Chirp at the Developer Hub[1].
   ///
   /// [1]: https://developers.chirp.io
-  static Future<void> initialise(String key, String secret) async {
+  static Future<void> init(String key, String secret) async {
     var parameters = { 'key': key, 'secret': secret };
-    await _methods.invokeMethod('initialise', new Map.from(parameters));
+    await _methods.invokeMethod('init', new Map.from(parameters));
   }
 
   /// Get the Chirp SDK version info as a string
@@ -84,7 +83,7 @@ class ChirpSDK {
     await _methods.invokeMethod('sendRandom');
   }
 
-  /// Check if payload is valid for the current configuration
+  // Check if payload is valid for the current configuration
   // static Future<bool> isValidPayload(Uint8List payload) async {
   //   final bool valid = await _methods.invokeMethod('isValidPayload', payload);
   //   return valid;

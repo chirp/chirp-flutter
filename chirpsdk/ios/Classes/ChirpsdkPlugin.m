@@ -49,7 +49,7 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if ([@"initialise" isEqualToString:call.method]) {
+  if ([@"init" isEqualToString:call.method]) {
     NSString *key = call.arguments[@"key"];
     NSString *secret = call.arguments[@"secret"];
     self.connect = [[ChirpConnect alloc] initWithAppKey:key

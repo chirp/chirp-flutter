@@ -51,7 +51,7 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
 
   override fun onMethodCall(call: MethodCall, result: Result) {
 
-    if (call.method == "initialise") {
+    if (call.method == "init") {
       val arguments = call.arguments as java.util.HashMap<String, String>
       val appKey = arguments["key"] as String
       val appSecret = arguments["secret"] as String

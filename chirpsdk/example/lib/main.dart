@@ -26,8 +26,8 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
   String _chirpVersion = 'Unknown';
   Uint8List _chirpData = Uint8List(0);
 
-  Future<void> _initialiseChirp() async {
-    await ChirpSDK.initialise(_appKey, _appSecret);
+  Future<void> _initChirp() async {
+    await ChirpSDK.init(_appKey, _appSecret);
   }
 
   Future<void> _configureChirp() async {
@@ -92,7 +92,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _requestPermissions();
-    _initialiseChirp();
+    _initChirp();
     _configureChirp();
     _getChirpVersion();
     _setChirpCallbacks();
