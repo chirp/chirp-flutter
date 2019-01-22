@@ -14,12 +14,18 @@ enum ChirpState {
 
 class ChirpSDK {
   static const MethodChannel _methods = const MethodChannel('chirp.io/methods');
-  static const EventChannel _stateEvents = const EventChannel('chirp.io/events/state');
-  static const EventChannel _sendingEvents = const EventChannel('chirp.io/events/sending');
-  static const EventChannel _sentEvents = const EventChannel('chirp.io/events/sent');
-  static const EventChannel _receivingEvents = const EventChannel('chirp.io/events/receiving');
-  static const EventChannel _receivedEvents = const EventChannel('chirp.io/events/received');
-  static const EventChannel _errorEvents = const EventChannel('chirp.io/events/errors');
+  static const EventChannel _stateEvents =
+      const EventChannel('chirp.io/events/state');
+  static const EventChannel _sendingEvents =
+      const EventChannel('chirp.io/events/sending');
+  static const EventChannel _sentEvents =
+      const EventChannel('chirp.io/events/sent');
+  static const EventChannel _receivingEvents =
+      const EventChannel('chirp.io/events/receiving');
+  static const EventChannel _receivedEvents =
+      const EventChannel('chirp.io/events/received');
+  static const EventChannel _errorEvents =
+      const EventChannel('chirp.io/events/errors');
 
   /// Initialise the ChirpSDK
   ///
@@ -28,7 +34,7 @@ class ChirpSDK {
   ///
   /// [1]: https://developers.chirp.io
   static Future<void> init(String key, String secret) async {
-    var parameters = { 'key': key, 'secret': secret };
+    var parameters = {'key': key, 'secret': secret};
     await _methods.invokeMethod('init', new Map.from(parameters));
   }
 
@@ -140,7 +146,7 @@ class ChirpSDK {
   static ChirpStateEvent _stateEvent(dynamic map) {
     if (map is Map) {
       return new ChirpStateEvent(ChirpState.values[map['previous']],
-                                 ChirpState.values[map['current']]);
+          ChirpState.values[map['current']]);
     }
     return null;
   }

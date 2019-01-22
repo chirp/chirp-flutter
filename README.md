@@ -9,12 +9,6 @@ Sign up at the Chirp [Developer Hub](https://developers.chirp.io/sign-up)
 Copy and paste your Chirp app key, secret and chosen configuration into the
 [example application](https://github.com/chirp/chirp-connect-flutter/tree/master/chirpsdk/example)
 
-## Configuration
-
-It is recommended to use the example code as a template, but in short, configuring the
-SDK is as simple as initialising with your credentials and chosen configuration, and starting
-the audio processing.
-
     await ChirpSDK.init(_appKey, _appSecret);
     await ChirpSDK.setConfig(_appConfig);
     await ChirpSDK.start();
