@@ -13,6 +13,18 @@ Copy and paste your Chirp app key, secret and chosen configuration into the
     await ChirpSDK.setConfig(_appConfig);
     await ChirpSDK.start();
 
+## Permissions
+
+To grant iOS apps permission to use the microphone, you will need to add a `Privacy - Microphone Usage Description`
+statement to the `Info.plist` in the Runner xcode project.
+
+For Android you will need to edit the `AndroidManifest.xml` file to include
+
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 ## Sending
 
 Chirp SDKs accept data as an array of bytes, creating a versatile interface for all kinds of data.
