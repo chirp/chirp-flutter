@@ -1,5 +1,9 @@
 # Chirp SDK Flutter
 
+## 0.1.1 - 01/03/19
+
+- Upgrade to Android v3.6.1
+
 ## 0.1.0 - 22/01/19
 
 - Bringing out of experimental status
