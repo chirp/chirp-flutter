@@ -6,4 +6,4 @@ Demonstrates how to use the ChirpSDK plugin.
 
 This project is a starting point for a Flutter application using Chirp.
 
-- [Example Code](https://github.com/chirp/chirp-connect-flutter/tree/master/example)
+- [Example Code](https://github.com/chirp/chirp-flutter/tree/master/example)
