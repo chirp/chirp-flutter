@@ -1,5 +1,5 @@
 name: chirpsdk
-version: 0.1.1
+version: 0.3.0
 description: Chirp enables your apps to send and receive information using sound.
 author: Asio Ltd <developers@chirp.io>
 homepage: https://github.com/chirp/chirp-flutter
