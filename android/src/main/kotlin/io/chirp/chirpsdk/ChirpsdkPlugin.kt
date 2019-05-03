@@ -105,7 +105,7 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
            */
           stateStreamHandler.send(oldState.code, newState.code)
         }
-        chirpConnect.onSystemVolumeChanged { oldVolume: Int, newVolume: Int ->
+        chirpConnect.onSystemVolumeChanged { oldVolume: Float, newVolume: Float ->
           /**
            * onSystemVolumeChanged is called when the system volume is changed.
            */

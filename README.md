@@ -13,6 +13,10 @@ Copy and paste your Chirp app key, secret and chosen configuration into the
     await ChirpSDK.setConfig(_appConfig);
     await ChirpSDK.start();
 
+Please see the [example](https://github.com/chirp/chirp-flutter/tree/master/chirpsdk/example)
+for a more detailed run through of how to use the Chirp SDK.
+For example the Chirp SDK async methods must called inside a Future async parent method.
+
 ## Permissions
 
 To grant iOS apps permission to use the microphone, you will need to add a `Privacy - Microphone Usage Description`

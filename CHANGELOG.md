@@ -1,5 +1,13 @@
 # Chirp SDK Flutter
 
+## 0.3.0 - beta
+
+- Upgrade to Android v3.8.0
+
+## 0.2.0 - beta
+
+- Upgrade to iOS v3.5.0
+
 ## 0.1.1 - 01/03/19
 
 - Upgrade to Android v3.6.1
