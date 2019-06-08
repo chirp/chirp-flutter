@@ -7,13 +7,13 @@ Send data with sound.
 Sign up at the Chirp [Developer Hub](https://developers.chirp.io/sign-up)
 
 Copy and paste your Chirp app key, secret and chosen configuration into the
-[example application](https://github.com/chirp/chirp-flutter/tree/master/chirpsdk/example)
+[example application](https://github.com/chirp/chirp-flutter/tree/master/example)
 
     await ChirpSDK.init(_appKey, _appSecret);
     await ChirpSDK.setConfig(_appConfig);
     await ChirpSDK.start();
 
-Please see the [example](https://github.com/chirp/chirp-flutter/tree/master/chirpsdk/example)
+Please see the [example](https://github.com/chirp/chirp-flutter/tree/master/example)
 for a more detailed run through of how to use the Chirp SDK.
 For example the Chirp SDK async methods must called inside a Future async parent method.
 
