@@ -2,7 +2,7 @@
 
 ## 0.4.0 - beta
 
-- Upgrade to Android v3.9.2
+- Upgrade to Android v3.9.5
 - Upgrade to iOS v3.5.2
 
 ## 0.3.0 - 03/05/19
