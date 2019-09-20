@@ -71,21 +71,27 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
            * onSending is called when a send event begins.
            * The data argument contains the payload being sent.
            */
-          sendingStreamHandler.send(payload, channel)
+          activity.runOnUiThread {
+            sendingStreamHandler.send(payload, channel)
+          }
         }
         chirpConnect.onSent { payload: ByteArray, channel: Int ->
           /**
            * onSent is called when a send event has completed.
            * The payload argument contains the payload data that was sent.
            */
-          sentStreamHandler.send(payload, channel)
+          activity.runOnUiThread {
+            sentStreamHandler.send(payload, channel)
+          }
         }
         chirpConnect.onReceiving { channel: Int ->
           /**
            * onReceiving is called when a receive event begins.
            * No data has yet been received.
            */
-          receivingStreamHandler.send(channel)
+          activity.runOnUiThread {
+            receivingStreamHandler.send(channel)
+          }
         }
         chirpConnect.onReceived { payload: ByteArray?, channel: Int ->
           /**
@@ -93,17 +99,21 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
            * If the payload was decoded successfully, it is passed in payload.
            * Otherwise, payload is null.
            */
-          if (payload != null) {
-            receivedStreamHandler.send(payload, channel)
-          } else {
-            errorStreamHandler.send(0, "Chirp: Decode failed.")
+          activity.runOnUiThread {
+            if (payload != null) {
+              receivedStreamHandler.send(payload, channel)
+            } else {
+              errorStreamHandler.send(0, "Chirp: Decode failed.")
+            }
           }
         }
         chirpConnect.onStateChanged { oldState: ChirpConnectState, newState: ChirpConnectState ->
           /**
            * onStateChanged is called when the SDK changes state.
            */
-          stateStreamHandler.send(oldState.code, newState.code)
+          activity.runOnUiThread {
+            stateStreamHandler.send(oldState.code, newState.code)
+          }
         }
         chirpConnect.onSystemVolumeChanged { oldVolume: Float, newVolume: Float ->
           /**
