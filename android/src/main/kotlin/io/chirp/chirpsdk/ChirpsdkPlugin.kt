@@ -11,14 +11,15 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
-import io.chirp.connect.ChirpConnect;
-import io.chirp.connect.interfaces.ConnectEventListener;
-import io.chirp.connect.models.ChirpConnectState;
-import io.chirp.connect.models.ChirpError
+import io.chirp.chirpsdk.interfaces.ChirpEventListener
+import io.chirp.chirpsdk.models.ChirpSDKState
+import io.chirp.chirpsdk.models.ChirpError
 
 
 class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
 
+  //TODO: Don't see the reason why we need multiple StreamHandlers for the same ChirpEventListener events.
+  // I don't think that StreamHandler is limited to one single event type.
   val stateStreamHandler = StateStreamHandler()
   val sendingStreamHandler = SendingStreamHandler()
   val sentStreamHandler = SentStreamHandler()
@@ -27,7 +28,7 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
   val errorStreamHandler = ErrorStreamHandler()
 
   companion object {
-    lateinit var chirpConnect: ChirpConnect
+    lateinit var chirpSDK: ChirpSDK
 
     @JvmStatic
     fun registerWith(registrar: Registrar) {
@@ -51,22 +52,26 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
 
   override fun onMethodCall(call: MethodCall, result: Result) {
 
+    //TODO: I think a switch->case is a better option here instead of multiple if/else
     if (call.method == "init") {
-      val arguments = call.arguments as java.util.HashMap<String, String>
+      val arguments = call.arguments as java.util.HashMap<*, *>
       val appKey = arguments["key"] as String
       val appSecret = arguments["secret"] as String
-      chirpConnect = ChirpConnect(activity, appKey, appSecret)
+      chirpSDK = ChirpSDK(activity, appKey, appSecret)
     }
     else if (call.method == "version") {
-      result.success(chirpConnect.version)
+      result.success(chirpSDK.version)
     }
     else if (call.method == "setConfig") {
-      var config: String = call.arguments as String
-      val error: ChirpError = chirpConnect.setConfig(config)
+      val config: String = call.arguments as String
+      val error: ChirpError = chirpSDK.setConfig(config)
       if (error.code > 0) {
+        //TODO: How do you know that errorHandler comes from this specific method call?
+        // Why not returning here instead? We are awaiting for the operation to complete anyway.
+        // Same for all other interface method calls.
         errorStreamHandler.send(error.code, error.message)
       } else {
-        chirpConnect.onSending { payload: ByteArray, channel: Int ->
+        chirpSDK.onSending { payload: ByteArray, channel: Int ->
           /**
            * onSending is called when a send event begins.
            * The data argument contains the payload being sent.
@@ -75,7 +80,7 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
             sendingStreamHandler.send(payload, channel)
           }
         }
-        chirpConnect.onSent { payload: ByteArray, channel: Int ->
+        chirpSDK.onSent { payload: ByteArray, channel: Int ->
           /**
            * onSent is called when a send event has completed.
            * The payload argument contains the payload data that was sent.
@@ -84,7 +89,7 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
             sentStreamHandler.send(payload, channel)
           }
         }
-        chirpConnect.onReceiving { channel: Int ->
+        chirpSDK.onReceiving { channel: Int ->
           /**
            * onReceiving is called when a receive event begins.
            * No data has yet been received.
@@ -93,7 +98,7 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
             receivingStreamHandler.send(channel)
           }
         }
-        chirpConnect.onReceived { payload: ByteArray?, channel: Int ->
+        chirpSDK.onReceived { payload: ByteArray?, channel: Int ->
           /**
            * onReceived is called when a receive event has completed.
            * If the payload was decoded successfully, it is passed in payload.
@@ -103,11 +108,12 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
             if (payload != null) {
               receivedStreamHandler.send(payload, channel)
             } else {
+              //TODO: Decode failure is not an error and should not processed as an error
               errorStreamHandler.send(0, "Chirp: Decode failed.")
             }
           }
         }
-        chirpConnect.onStateChanged { oldState: ChirpConnectState, newState: ChirpConnectState ->
+        chirpSDK.onStateChanged { oldState: ChirpSDKState, newState: ChirpSDKState ->
           /**
            * onStateChanged is called when the SDK changes state.
            */
@@ -115,7 +121,7 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
             stateStreamHandler.send(oldState.code, newState.code)
           }
         }
-        chirpConnect.onSystemVolumeChanged { oldVolume: Float, newVolume: Float ->
+        chirpSDK.onSystemVolumeChanged { oldVolume: Float, newVolume: Float ->
           /**
            * onSystemVolumeChanged is called when the system volume is changed.
            */
@@ -123,49 +129,46 @@ class ChirpsdkPlugin(val activity: Activity) : MethodCallHandler {
       }
     }
     else if (call.method == "start") {
-      val error: ChirpError = chirpConnect.start();
+      val error: ChirpError = chirpSDK.start()
       if (error.code > 0) {
         errorStreamHandler.send(error.code, error.message)
       }
     }
     else if (call.method == "stop") {
-      val error: ChirpError = chirpConnect.stop()
+      val error: ChirpError = chirpSDK.stop()
       if (error.code > 0) {
         errorStreamHandler.send(error.code, error.message)
       }
     }
     else if (call.method == "send") {
-      val payload: ByteArray =  call.arguments as ByteArray
-      val error: ChirpError = chirpConnect.send(payload)
+      val payload =  call.arguments as ByteArray
+      val error: ChirpError = chirpSDK.send(payload)
       if (error.code > 0) {
         errorStreamHandler.send(error.code, error.message)
       }
     }
     else if (call.method == "sendRandom") {
-      val payload: ByteArray = chirpConnect.randomPayload(0)
-      val error: ChirpError = chirpConnect.send(payload)
+      val payload = chirpSDK.randomPayload(0)
+      val error: ChirpError = chirpSDK.send(payload)
       if (error.code > 0) {
         errorStreamHandler.send(error.code, error.message)
       }
     }
-    // else if (call.method == "isValidPayload") {
-    //   val payload: ByteArray =  call.arguments as ByteArray
-    //   val error: ChirpError = chirpConnect.send(payload)
-    //   if (error.code > 0) {
-    //     errorStreamHandler.send(error.code, error.message)
-    //   }
-    // }
+    else if (call.method == "isValidPayload") {
+      val payload =  call.arguments as ByteArray
+      result.success(payload.size <= chirpSDK.maxPayloadLength())
+     }
     else if (call.method == "getState") {
-      result.success(chirpConnect.getState().code)
+      result.success(chirpSDK.getState().code)
     }
     else if (call.method == "maxPayloadLength") {
-      result.success(chirpConnect.maxPayloadLength())
+      result.success(chirpSDK.maxPayloadLength())
     }
     else if (call.method == "channelCount") {
-      result.success(chirpConnect.getChannelCount())
+      result.success(chirpSDK.getChannelCount())
     }
     else if (call.method == "transmissionChannel") {
-      result.success(chirpConnect.getTransmissionChannel())
+      result.success(chirpSDK.getTransmissionChannel())
     }
     else {
       result.notImplemented()
