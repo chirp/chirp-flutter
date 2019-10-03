@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 enum ChirpState {
   not_created,
   stopped,
-  paused,
   running,
   sending,
   receiving,
@@ -33,9 +32,9 @@ class ChirpSDK {
   /// up for Chirp at the Developer Hub[1].
   ///
   /// [1]: https://developers.chirp.io
-  static Future<void> init(String key, String secret) async {
+  static Future<int> init(String key, String secret) async {
     var parameters = {'key': key, 'secret': secret};
-    await _methods.invokeMethod('init', new Map.from(parameters));
+    return _methods.invokeMethod('init', new Map.from(parameters));
   }
 
   /// Get the Chirp SDK version info as a string
@@ -49,24 +48,24 @@ class ChirpSDK {
   /// A config string can be retrieved from the Developer Hub[1].
   ///
   /// [1]: https://developers.chirp.io
-  static Future<void> setConfig(String config) async {
-    await _methods.invokeMethod('setConfig', config);
+  static Future<int> setConfig(String config) async {
+    return await _methods.invokeMethod('setConfig', config);
   }
 
   /// Start audio processing
   ///
   /// This should be called after `setConfig`, and when
   /// resuming the app from the background. See example.
-  static Future<void> start() async {
-    await _methods.invokeMethod('start');
+  static Future<int> start() async {
+    return await _methods.invokeMethod('start');
   }
 
   /// Stop audio processing
   ///
   /// This should be called when the app enters the background
   /// or when shutting down the app for exit. See example.
-  static Future<void> stop() async {
-    await _methods.invokeMethod('stop');
+  static Future<int> stop() async {
+    return await _methods.invokeMethod('stop');
   }
 
   /// Send a payload to the speakers
@@ -80,20 +79,19 @@ class ChirpSDK {
   /// data[2] = 3;
   /// data[3] = 4;
   /// sdk.send(data);
-  static Future<void> send(Uint8List payload) async {
-    await _methods.invokeMethod('send', payload);
+  static Future<int> send(Uint8List payload) async {
+    return await _methods.invokeMethod('send', payload);
   }
 
-  /// Send a random payload to the speakers
-  static Future<void> sendRandom() async {
-    await _methods.invokeMethod('sendRandom');
+  /// Returns a randomly generated payload
+  static Future<Uint8List> randomPayload() async {
+    return await _methods.invokeMethod('randomPayload');
   }
 
-  // Check if payload is valid for the current configuration
-  // static Future<bool> isValidPayload(Uint8List payload) async {
-  //   final bool valid = await _methods.invokeMethod('isValidPayload', payload);
-  //   return valid;
-  // }
+  ///Converts an int error code to string error message
+  static Future<String> errorCodeToString(int code) async {
+    return await _methods.invokeMethod('errorCodeToString', code);
+  }
 
   /// Get the SDKs current state
   static Future<ChirpState> get state async {
