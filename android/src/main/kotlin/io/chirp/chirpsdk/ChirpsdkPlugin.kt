@@ -129,23 +129,31 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
     if (!isInitialised(call, result)) return
     val config: String = call.arguments as String
     val error: ChirpError = chirpSDK.setConfig(config)
-
-    //TODO: brainstorm if this is the best approach, maybe we should just report error here?
-    result.success(error.code)
-    if (error.code == 0) {
-      setCallbacks()
+    if (error.code > 0) {
+      result.error(error.code.toString(), error.message, null)
+      return
     }
+    result.success(error.code)
+    setCallbacks()
   }
 
   private fun start(call: MethodCall, result: Result) {
     if (!isInitialised(call, result)) return
     val error: ChirpError = chirpSDK.start()
+    if (error.code > 0) {
+      result.error(error.code.toString(), error.message, null)
+      return
+    }
     result.success(error.code)
   }
 
   private fun stop(call: MethodCall, result: Result) {
     if (!isInitialised(call, result)) return
     val error: ChirpError = chirpSDK.stop()
+    if (error.code > 0) {
+      result.error(error.code.toString(), error.message, null)
+      return
+    }
     result.success(error.code)
   }
 
@@ -153,6 +161,10 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
     if (!isInitialised(call, result)) return
     val payload =  call.arguments as ByteArray
     val error: ChirpError = chirpSDK.send(payload)
+    if (error.code > 0) {
+      result.error(error.code.toString(), error.message, null)
+      return
+    }
     result.success(error.code)
   }
 
