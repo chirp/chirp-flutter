@@ -1,23 +1,21 @@
 #import <Flutter/Flutter.h>
-#import <ChirpConnect/ChirpConnect.h>
+#import <ChirpSDK/ChirpSDK.h>
 
 @class StateStreamHandler;
 @class SendingStreamHandler;
 @class SentStreamHandler;
 @class ReceivingStreamHandler;
 @class ReceivedStreamHandler;
-@class ErrorStreamHandler;
 
 @interface ChirpsdkPlugin : NSObject<FlutterPlugin>
 
-@property (nonatomic, strong) ChirpConnect *connect;
+@property (nonatomic, strong) ChirpSDK *chirp;
 
 @property StateStreamHandler *stateStreamHandler;
 @property SendingStreamHandler *sendingStreamHandler;
 @property SentStreamHandler *sentStreamHandler;
 @property ReceivingStreamHandler *receivingStreamHandler;
 @property ReceivedStreamHandler *receivedStreamHandler;
-@property ErrorStreamHandler *errorStreamHandler;
 
 @end
 
@@ -41,6 +39,3 @@
 - (void)send:(FlutterStandardTypedData *)data channel:(NSNumber *)channel;
 @end
 
-@interface ErrorStreamHandler : NSObject<FlutterStreamHandler>
-- (void)send:(NSNumber *)code message:(NSString *)message;
-@end

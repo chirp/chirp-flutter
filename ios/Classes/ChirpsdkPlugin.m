@@ -40,130 +40,195 @@
                                           binaryMessenger:[registrar messenger]];
   instance.receivedStreamHandler = [[ReceivedStreamHandler alloc] init];
   [receivedChannel setStreamHandler:instance.receivedStreamHandler];
+}
 
-  FlutterEventChannel* errorChannel = [FlutterEventChannel
-                                       eventChannelWithName:@"chirp.io/events/errors"
-                                       binaryMessenger:[registrar messenger]];
-  instance.errorStreamHandler = [[ErrorStreamHandler alloc] init];
-  [errorChannel setStreamHandler:instance.errorStreamHandler];
+- (BOOL)isInitialised:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (self.chirp) {
+    return YES;
+  } else {
+    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", CHIRP_SDK_NOT_INITIALISED]
+                               message:@"ChirpSDK not initialised"
+                               details:nil]);
+    return NO;
+  }
+}
+
+- (void)handleError:(FlutterMethodCall*)call result:(FlutterResult)result withError:(NSError *)error {
+  if (error) {
+    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", error.code]
+                               message:error.description
+                               details:nil]);
+  } else {
+    result();
+  }
+}
+
+- (void)setCallbacks {
+  __weak typeof(self) weakSelf = self;
+  [weakSelf.chirp setStateUpdatedBlock:^(CHIRP_SDK_STATE oldState,
+                                         CHIRP_SDK_STATE newState)
+  {
+    /*------------------------------------------------------------------------------
+     * stateChangedBlock is called when the SDK changes state.
+     *----------------------------------------------------------------------------*/
+    [weakSelf.stateStreamHandler send:[NSNumber numberWithInteger:oldState]
+                              current:[NSNumber numberWithInteger:newState]];
+  }];
+
+  [weakSelf.chirp setSendingBlock:^(NSData * _Nonnull data, NSUInteger channel) {
+    /*------------------------------------------------------------------------------
+     * sendingBlock is called when a send event begins.
+     * The data argument contains the payload being sent.
+     *----------------------------------------------------------------------------*/
+    [weakSelf.sendingStreamHandler send:[FlutterStandardTypedData typedDataWithBytes:data]
+                                channel:[NSNumber numberWithInteger:channel]];
+  }];
+
+  [weakSelf.chirp setSentBlock:^(NSData * _Nonnull data, NSUInteger channel)
+  {
+    /*------------------------------------------------------------------------------
+     * sentBlock is called when a send event has completed.
+     * The data argument contains the payload that was sent.
+     *----------------------------------------------------------------------------*/
+    [weakSelf.sentStreamHandler send:[FlutterStandardTypedData typedDataWithBytes:data]
+                             channel:[NSNumber numberWithInteger:channel]];
+  }];
+
+  [weakSelf.chirp setReceivingBlock:^(NSUInteger channel)
+  {
+    /*------------------------------------------------------------------------------
+     * receivingBlock is called when a receive event begins.
+     * No data has yet been received.
+     *----------------------------------------------------------------------------*/
+    [weakSelf.receivingStreamHandler send:[NSNumber numberWithInteger:channel]];
+  }];
+
+  [weakSelf.chirp setReceivedBlock:^(NSData * _Nullable data, NSUInteger channel)
+   {
+     /*------------------------------------------------------------------------------
+      * receivedBlock is called when a receive event has completed.
+      * If the payload was decoded successfully, it is passed in data.
+      * Otherwise, data is null.
+      *----------------------------------------------------------------------------*/
+    [weakSelf.receivedStreamHandler send:[FlutterStandardTypedData typedDataWithBytes:data]
+                                 channel:[NSNumber numberWithInteger:channel]];
+   }];
+}
+
+- (void)init:(FlutterMethodCall*)call result:(FlutterResult)result {
+  NSString *key = call.arguments[@"key"];
+  NSString *secret = call.arguments[@"secret"];
+  self.chirp = [[ChirpSDK alloc] initWithAppKey:key
+                                      andSecret:secret];
+  if (self.chirp) {
+    result();
+  } else {
+    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", CHIRP_SDK_NOT_INITIALISED]
+                               message:@"Failed to initialise ChirpSDK"
+                               details:nil]);
+  }
+}
+
+- (void)version:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  result([self.chirp version]);
+}
+
+- (void)setConfig:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  NSString *config = call.arguments;
+  NSError *error = [self.chirp setConfig:config];
+  if (error) {
+    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", error.code]
+                               message:error.description
+                               details:nil]);
+  } else {
+    [self setCallbacks];
+    result();
+  }
+}
+
+- (void)start:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  NSError *error = [self.chirp start];
+  [self handleError:call result:result withError:error];
+}
+
+- (void)stop:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  NSError *error = [self.chirp stop];
+  [self handleError:call result:result withError:error];
+}
+
+- (void)send:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  NSData *payload = [(FlutterStandardTypedData *)call.arguments data];
+  NSError *error = [self.chirp send:payload];
+  [self handleError:call result:result withError:error];
+}
+
+- (void)sendRandom:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  NSData *payload = [self.chirp randomPayloadWithRandomLength];
+  NSError *error = [self.chirp send:payload];
+  [self handleError:call result:result withError:error];
+}
+
+- (void)getState:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  result([NSNumber numberWithInt:[self.chirp state]]);
+}
+
+- (void)maxPayloadLength:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  result([NSNumber numberWithInt:[self.chirp maxPayloadLength]]);
+}
+
+- (void)channelCount:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  result([NSNumber numberWithInt:[self.chirp channelCount]]);
+}
+
+- (void)isValidPayload:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if (![self isInitialised]) return;
+  NSData *payload = [(FlutterStandardTypedData *)call.arguments data];
+  result([NSNumber numberWithBool:[self.chirp isValidPayload:payload]]);
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   if ([@"init" isEqualToString:call.method]) {
-    NSString *key = call.arguments[@"key"];
-    NSString *secret = call.arguments[@"secret"];
-    self.connect = [[ChirpConnect alloc] initWithAppKey:key
-                                              andSecret:secret];
+    [self init:call result:result];
   }
   else if ([@"version" isEqualToString:call.method]) {
-    result([self.connect version]);
+    [self version:call result:result];
   }
   else if ([@"setConfig" isEqualToString:call.method]) {
-    NSString *config = call.arguments;
-    NSError *error = [self.connect setConfig:config];
-    if (error) {
-      [self.errorStreamHandler send:[NSNumber numberWithInteger:error.code]
-                            message:error.description];
-    }
-
-    __weak typeof(self) weakSelf = self;
-    [weakSelf.connect setStateUpdatedBlock:^(CHIRP_CONNECT_STATE oldState,
-                                             CHIRP_CONNECT_STATE newState)
-    {
-      /*------------------------------------------------------------------------------
-       * stateChangedBlock is called when the SDK changes state.
-       *----------------------------------------------------------------------------*/
-      [weakSelf.stateStreamHandler send:[NSNumber numberWithInteger:oldState]
-                                current:[NSNumber numberWithInteger:newState]];
-    }];
-
-    [weakSelf.connect setSendingBlock:^(NSData * _Nonnull data, NSUInteger channel) {
-      /*------------------------------------------------------------------------------
-       * sendingBlock is called when a send event begins.
-       * The data argument contains the payload being sent.
-       *----------------------------------------------------------------------------*/
-      [weakSelf.sendingStreamHandler send:[FlutterStandardTypedData typedDataWithBytes:data]
-                                  channel:[NSNumber numberWithInteger:channel]];
-    }];
-
-    [weakSelf.connect setSentBlock:^(NSData * _Nonnull data, NSUInteger channel)
-    {
-      /*------------------------------------------------------------------------------
-       * sentBlock is called when a send event has completed.
-       * The data argument contains the payload that was sent.
-       *----------------------------------------------------------------------------*/
-      [weakSelf.sentStreamHandler send:[FlutterStandardTypedData typedDataWithBytes:data]
-                               channel:[NSNumber numberWithInteger:channel]];
-    }];
-
-    [weakSelf.connect setReceivingBlock:^(NSUInteger channel)
-    {
-      /*------------------------------------------------------------------------------
-       * receivingBlock is called when a receive event begins.
-       * No data has yet been received.
-       *----------------------------------------------------------------------------*/
-      [weakSelf.receivingStreamHandler send:[NSNumber numberWithInteger:channel]];
-    }];
-
-    [weakSelf.connect setReceivedBlock:^(NSData * _Nonnull data, NSUInteger channel)
-     {
-       /*------------------------------------------------------------------------------
-        * receivedBlock is called when a receive event has completed.
-        * If the payload was decoded successfully, it is passed in data.
-        * Otherwise, data is null.
-        *----------------------------------------------------------------------------*/
-      if (data) {
-        [weakSelf.receivedStreamHandler send:[FlutterStandardTypedData typedDataWithBytes:data]
-                                     channel:[NSNumber numberWithInteger:channel]];
-      } else {
-        [self.errorStreamHandler send:[NSNumber numberWithInteger:0]
-                            message:@"Chirp: Decode failed."];
-      }
-     }];
+    [self setConfig:call result:result];
   }
   else if ([@"start" isEqualToString:call.method]) {
-    NSError *error = [self.connect start];
-    if (error) {
-      [self.errorStreamHandler send:[NSNumber numberWithInteger:error.code]
-                            message:error.description];
-    }
+    [self start:call result:result];
   }
   else if ([@"stop" isEqualToString:call.method]) {
-    NSError *error = [self.connect stop];
-    if (error) {
-      [self.errorStreamHandler send:[NSNumber numberWithInteger:error.code]
-                            message:error.description];
-    }
+    [self stop:call result:result];
   }
   else if ([@"send" isEqualToString:call.method]) {
-    NSData *payload = [(FlutterStandardTypedData *)call.arguments data];
-    NSError *error = [self.connect send:payload];
-    if (error) {
-      [self.errorStreamHandler send:[NSNumber numberWithInteger:error.code]
-                            message:error.description];
-    }
+    [self send:call result:result];
   }
   else if ([@"sendRandom" isEqualToString:call.method]) {
-    NSData *payload = [self.connect randomPayloadWithRandomLength];
-    NSError *error = [self.connect send:payload];
-    if (error) {
-      [self.errorStreamHandler send:[NSNumber numberWithInteger:error.code]
-                            message:error.description];
-    }
+    [self sendRandom:call result:result];
   }
   else if ([@"getState" isEqualToString:call.method]) {
-    result([NSNumber numberWithInt:[self.connect state]]);
+    [self getState:call result:result];
   }
   else if ([@"maxPayloadLength" isEqualToString:call.method]) {
-    result([NSNumber numberWithInt:[self.connect maxPayloadLength]]);
+    [self maxPayloadLength:call result:result];
   }
   else if ([@"channelCount" isEqualToString:call.method]) {
-    result([NSNumber numberWithInt:[self.connect channelCount]]);
+    [self channelCount:call result:result];
   }
-  // else if ([@"isValidPayload" isEqualToString:call.method]) {
-  //   NSData *payload = [(FlutterStandardTypedData *)call.arguments data];
-  //   result([NSNumber numberWithBool:[self.connect isValidPayload:payload]]);
-  // }
+  else if ([@"isValidPayload" isEqualToString:call.method]) {
+    [self isValidPayload:call result:result];
+  }
   else {
     result(FlutterMethodNotImplemented);
   }

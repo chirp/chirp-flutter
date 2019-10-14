@@ -1,6 +1,13 @@
 # Chirp SDK Flutter
 
-## 0.4.0 - beta
+## 1.0.0 - beta
+
+- Update error handling to use `try/catch`
+- Fix bug so callbacks are on the main thread
+- Upgrade to Android v3.10.1
+- Upgrade to iOS v3.6.0
+
+## 0.4.0 - 23/07/19
 
 - Upgrade to Android v3.9.5
 - Upgrade to iOS v3.5.2

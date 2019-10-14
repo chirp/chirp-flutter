@@ -24,7 +24,6 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
   val sentStreamHandler = SentStreamHandler()
   val receivingStreamHandler = ReceivingStreamHandler()
   val receivedStreamHandler = ReceivedStreamHandler()
-  val errorStreamHandler = ErrorStreamHandler()
 
   lateinit var chirpSDK: ChirpSDK
 
@@ -45,8 +44,6 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
       receivingChannel.setStreamHandler(instance.receivingStreamHandler)
       val receivedChannel = EventChannel(registrar.messenger(), "chirp.io/events/received")
       receivedChannel.setStreamHandler(instance.receivedStreamHandler)
-      val errorsChannel = EventChannel(registrar.messenger(), "chirp.io/events/errors")
-      errorsChannel.setStreamHandler(instance.errorStreamHandler)
     }
   }
 
@@ -64,7 +61,11 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
     val appKey = arguments["key"] as String
     val appSecret = arguments["secret"] as String
     chirpSDK = ChirpSDK(activity, appKey, appSecret)
-    result.success(ChirpErrorCode.CHIRP_SDK_OK.code)
+    if (chirpSDK) {
+      result.success(ChirpErrorCode.CHIRP_SDK_OK.code)
+    } else {
+      result.error(-1, "Failed to initialise ChirpSDK", null)
+    }
   }
 
   private fun version(call: MethodCall, result: Result) {
@@ -133,8 +134,8 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
       result.error(error.code.toString(), error.message, null)
       return
     }
-    result.success(error.code)
     setCallbacks()
+    result.success(error.code)
   }
 
   private fun start(call: MethodCall, result: Result) {
@@ -306,23 +307,6 @@ class ReceivedStreamHandler : StreamHandler {
   fun send(data: ByteArray?, channel: Int) {
     eventSink?.success(mapOf("data" to data,
                              "channel" to channel))
-  }
-
-  override fun onCancel(arguments: Any?) {
-    eventSink = null
-  }
-}
-
-class ErrorStreamHandler : StreamHandler {
-  private var eventSink: EventSink? = null
-
-  override fun onListen(arguments: Any?, sink: EventSink) {
-    eventSink = sink
-  }
-
-  fun send(code: Int, message: String) {
-    eventSink?.success(mapOf("code" to code,
-                             "message" to message))
   }
 
   override fun onCancel(arguments: Any?) {

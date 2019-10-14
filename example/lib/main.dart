@@ -45,21 +45,21 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
 
   Future<void> _initChirp() async {
     try {
-      //Init ChirpSDK
+      // Init ChirpSDK
       await ChirpSDK.init(_appKey, _appSecret);
 
-      //Get and print SDK version
+      // Get and print SDK version
       final String chirpVersion = await ChirpSDK.version;
       setState(() {
-        _chirpVersion = "chirpVersion: $chirpVersion";
+        _chirpVersion = "ChirpSDK: $chirpVersion";
       });
 
-      //Set SDK config
+      // Set SDK config
       await ChirpSDK.setConfig(_appConfig);
       _setChirpCallbacks();
 
     } catch (err) {
-      setErrorMessage("Error catched with code: ${err.code}; and message: ${err.message};");
+      setErrorMessage("ChirpError: ${err.code} - ${err.message}");
     }
   }
 
@@ -72,7 +72,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         _stopSDK();
       }
     } catch (err) {
-      setErrorMessage("Error sending random payload: ${err.message};");
+      setErrorMessage("ChirpError: ${err.message};");
     }
   }
 
