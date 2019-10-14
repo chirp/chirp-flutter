@@ -45,3 +45,5 @@ xcuserdata/
 
 *.aar
 *.framework
+
+example/ios/Flutter/flutter_export_environment.sh'

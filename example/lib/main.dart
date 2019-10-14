@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:chirpsdk/chirpsdk.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
@@ -24,33 +23,93 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
   ChirpState _chirpState = ChirpState.not_created;
   String _chirpErrors = '';
   String _chirpVersion = 'Unknown';
+  String _startStopBtnText = 'START';
   Uint8List _chirpData = Uint8List(0);
 
-  Future<void> _initChirp() async {
-    await ChirpSDK.init(_appKey, _appSecret);
-  }
-
-  Future<void> _configureChirp() async {
-    await ChirpSDK.setConfig(_appConfig);
-  }
-
-  Future<void> _sendRandomChirp() async {
-    await ChirpSDK.sendRandom();
-  }
-
-  Future<void> _startAudioProcessing() async {
-    await ChirpSDK.start();
-  }
-
-  Future<void> _stopAudioProcessing() async {
-    await ChirpSDK.stop();
-  }
-
-  Future<void> _getChirpVersion() async {
-    final String chirpVersion = await ChirpSDK.version;
+  void setPayload(Uint8List payload) {
     setState(() {
-      _chirpVersion = chirpVersion;
+      _chirpData = payload;
     });
+  }
+
+  void setErrorMessage(String error) {
+    setState(() {
+      _chirpErrors = error;
+    });
+  }
+
+  void setErrorCode(int errorCode) async {
+    var errorMessage = await ChirpSDK.errorCodeToString(errorCode);
+    setErrorMessage(errorMessage);
+  }
+
+  Future<void> _initChirp() async {
+    try {
+      //Init ChirpSDK
+      await ChirpSDK.init(_appKey, _appSecret);
+
+      //Get and print SDK version
+      final String chirpVersion = await ChirpSDK.version;
+      setState(() {
+        _chirpVersion = "chirpVersion: $chirpVersion";
+      });
+
+      //Set SDK config
+      await ChirpSDK.setConfig(_appConfig);
+      _setChirpCallbacks();
+
+    } catch (err) {
+      setErrorMessage("Error catched with code: ${err.code}; and message: ${err.message};");
+    }
+  }
+
+  void _startStopSDK() async {
+    try {
+      var state = await ChirpSDK.state;
+      if (state == ChirpState.stopped) {
+        _startSDK();
+      } else {
+        _stopSDK();
+      }
+    } catch (err) {
+      setErrorMessage("Error sending random payload: ${err.message};");
+    }
+  }
+
+  void _startSDK() async {
+    try {
+      await ChirpSDK.start();
+      setState(() {
+        _startStopBtnText = "STOP";
+      });
+    } catch (err) {
+      setErrorMessage("Error starting the SDK: ${err.message};");
+    }
+  }
+
+  void _stopSDK() async {
+    try {
+      await ChirpSDK.stop();
+      setState(() {
+        _startStopBtnText = "START";
+      });
+    } catch (err) {
+      setErrorMessage("Error stopping the SDK: ${err.message};");
+    }
+  }
+
+  void _sendRandomPayload() async {
+    try {
+      Uint8List payload = await ChirpSDK.randomPayload();
+      setPayload(payload);
+      var errorCode = await ChirpSDK.send(payload);
+      if (errorCode > 0) {
+        setErrorCode(errorCode);
+        return;
+      }
+    } catch (err) {
+      setErrorMessage("Error sending random payload: ${err.message};");
+    }
   }
 
   Future<void> _setChirpCallbacks() async {
@@ -91,26 +150,26 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _requestPermissions();
-    _initChirp();
-    _configureChirp();
-    _getChirpVersion();
-    _setChirpCallbacks();
-    _startAudioProcessing();
+    try {
+      _requestPermissions();
+      _initChirp();
+    } catch(e) {
+      _chirpErrors = e.toString();
+    }
   }
 
   @override
   void dispose() {
-    _stopAudioProcessing();
+    _stopSDK();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      _stopAudioProcessing();
+      _stopSDK();
     } else if (state == AppLifecycleState.resumed) {
-      _startAudioProcessing();
+      _startSDK();
     }
   }
 
@@ -149,7 +208,15 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
                   style: TextStyle(fontFamily: 'MarkPro')
                 ),
                 color: chirpYellow,
-                onPressed: _sendRandomChirp,
+                onPressed: _sendRandomPayload,
+              ),
+              RaisedButton(
+                child: Text(
+                    _startStopBtnText,
+                    style: TextStyle(fontFamily: 'MarkPro')
+                ),
+                color: chirpYellow,
+                onPressed: _startStopSDK,
               ),
               Text(
                 '$_chirpErrors\n',
