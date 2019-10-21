@@ -46,7 +46,7 @@
   if (self.chirp) {
     return YES;
   } else {
-    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", CHIRP_SDK_NOT_INITIALISED]
+    result([FlutterError errorWithCode:@"-1"
                                message:@"ChirpSDK not initialised"
                                details:nil]);
     return NO;
@@ -55,11 +55,11 @@
 
 - (void)handleError:(FlutterMethodCall*)call result:(FlutterResult)result withError:(NSError *)error {
   if (error) {
-    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", error.code]
+    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%ld", (long)error.code]
                                message:error.description
                                details:nil]);
   } else {
-    result();
+    result(nil);
   }
 }
 
@@ -121,76 +121,76 @@
   self.chirp = [[ChirpSDK alloc] initWithAppKey:key
                                       andSecret:secret];
   if (self.chirp) {
-    result();
+    result(nil);
   } else {
-    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", CHIRP_SDK_NOT_INITIALISED]
+    result([FlutterError errorWithCode:@"-1"
                                message:@"Failed to initialise ChirpSDK"
                                details:nil]);
   }
 }
 
 - (void)version:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
+  if (![self isInitialised:call result:result]) return;
   result([self.chirp version]);
 }
 
 - (void)setConfig:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
+  if (![self isInitialised:call result:result]) return;
   NSString *config = call.arguments;
   NSError *error = [self.chirp setConfig:config];
   if (error) {
-    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%d", error.code]
+    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%ld", (long)error.code]
                                message:error.description
                                details:nil]);
   } else {
     [self setCallbacks];
-    result();
+    result(nil);
   }
 }
 
 - (void)start:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
+  if (![self isInitialised:call result:result]) return;
   NSError *error = [self.chirp start];
   [self handleError:call result:result withError:error];
 }
 
 - (void)stop:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
+  if (![self isInitialised:call result:result]) return;
   NSError *error = [self.chirp stop];
   [self handleError:call result:result withError:error];
 }
 
 - (void)send:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
+  if (![self isInitialised:call result:result]) return;
   NSData *payload = [(FlutterStandardTypedData *)call.arguments data];
   NSError *error = [self.chirp send:payload];
   [self handleError:call result:result withError:error];
 }
 
 - (void)sendRandom:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
+  if (![self isInitialised:call result:result]) return;
   NSData *payload = [self.chirp randomPayloadWithRandomLength];
   NSError *error = [self.chirp send:payload];
   [self handleError:call result:result withError:error];
 }
 
 - (void)getState:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
+  if (![self isInitialised:call result:result]) return;
   result([NSNumber numberWithInt:[self.chirp state]]);
 }
 
 - (void)maxPayloadLength:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
-  result([NSNumber numberWithInt:[self.chirp maxPayloadLength]]);
+  if (![self isInitialised:call result:result]) return;
+  result(@([self.chirp maxPayloadLength]));
 }
 
 - (void)channelCount:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
-  result([NSNumber numberWithInt:[self.chirp channelCount]]);
+  if (![self isInitialised:call result:result]) return;
+  result(@([self.chirp channelCount]));
 }
 
 - (void)isValidPayload:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (![self isInitialised]) return;
+  if (![self isInitialised:call result:result]) return;
   NSData *payload = [(FlutterStandardTypedData *)call.arguments data];
   result([NSNumber numberWithBool:[self.chirp isValidPayload:payload]]);
 }
@@ -355,30 +355,6 @@
 - (void)send:(FlutterStandardTypedData *)data channel:(NSNumber *)channel {
   if (_eventSink) {
     NSDictionary *dictionary = @{ @"data": data, @"channel": channel };
-    _eventSink(dictionary);
-  }
-}
-
-- (FlutterError * _Nullable)onCancelWithArguments:(id _Nullable)arguments {
-  _eventSink = nil;
-  return nil;
-}
-
-@end
-
-
-@implementation ErrorStreamHandler {
-  FlutterEventSink _eventSink;
-}
-
-- (FlutterError *_Nullable)onListenWithArguments:(id _Nullable)arguments eventSink:(FlutterEventSink)events {
-  _eventSink = events;
-  return nil;
-}
-
-- (void)send:(NSNumber *)code message:(NSString *)message {
-  if (_eventSink) {
-    NSDictionary *dictionary = @{ @"code": code, @"message": message };
     _eventSink(dictionary);
   }
 }
