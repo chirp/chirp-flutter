@@ -1,4 +1,4 @@
-package com.example.chirp_flutter_example
+package io.chirp.chirp_flutter_example
 
 import android.os.Bundle
 import io.flutter.app.FlutterActivity
