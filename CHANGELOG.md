@@ -1,7 +1,8 @@
-# Chirp SDK Flutter
+# Chirp for Flutter
 
 ## 1.0.0 - beta
 
+- Rename package to `chirp_flutter`
 - Update error handling to use `try/catch`
 - Fix bug so callbacks are on the main thread
 - Upgrade to Android v3.10.1

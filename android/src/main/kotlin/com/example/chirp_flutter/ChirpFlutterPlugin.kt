@@ -1,4 +1,4 @@
-package io.chirp.chirpsdk
+package io.chirp.chirp_flutter
 
 import android.app.Activity
 
@@ -11,13 +11,14 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
+import io.chirp.chirpsdk.ChirpSDK
 import io.chirp.chirpsdk.interfaces.ChirpEventListener
 import io.chirp.chirpsdk.models.ChirpSDKState
 import io.chirp.chirpsdk.models.ChirpError
 import io.chirp.chirpsdk.models.ChirpErrorCode
 
 
-class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
+class ChirpFlutterPlugin(private val activity: Activity) : MethodCallHandler {
 
   val stateStreamHandler = StateStreamHandler()
   val sendingStreamHandler = SendingStreamHandler()
@@ -31,7 +32,7 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
 
     @JvmStatic
     fun registerWith(registrar: Registrar) {
-      val instance = ChirpsdkPlugin(registrar.activity())
+      val instance = ChirpFlutterPlugin(registrar.activity())
       val methodChannel = MethodChannel(registrar.messenger(), "chirp.io/methods")
       methodChannel.setMethodCallHandler(instance)
       val stateChannel = EventChannel(registrar.messenger(), "chirp.io/events/state")
@@ -61,10 +62,10 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
     val appKey = arguments["key"] as String
     val appSecret = arguments["secret"] as String
     chirpSDK = ChirpSDK(activity, appKey, appSecret)
-    if (chirpSDK) {
-      result.success(ChirpErrorCode.CHIRP_SDK_OK.code)
+    if (chirpSDK == null) {
+      result.error("-1", "Failed to initialise ChirpSDK", null)
     } else {
-      result.error(-1, "Failed to initialise ChirpSDK", null)
+      result.success(ChirpErrorCode.CHIRP_SDK_OK.code)
     }
   }
 

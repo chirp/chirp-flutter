@@ -1,6 +1,6 @@
-#import "ChirpsdkPlugin.h"
+#import "ChirpFlutterPlugin.h"
 
-@implementation ChirpsdkPlugin {
+@implementation ChirpFlutterPlugin {
   FlutterEventSink _eventSink;
 }
 
@@ -8,7 +8,7 @@
   FlutterMethodChannel* methodChannel = [FlutterMethodChannel
                                          methodChannelWithName:@"chirp.io/methods"
                                          binaryMessenger:[registrar messenger]];
-  ChirpsdkPlugin* instance = [[ChirpsdkPlugin alloc] init];
+  ChirpFlutterPlugin* instance = [[ChirpFlutterPlugin alloc] init];
   [registrar addMethodCallDelegate:instance channel:methodChannel];
 
   FlutterEventChannel* stateChannel = [FlutterEventChannel
@@ -167,7 +167,7 @@
   [self handleError:call result:result withError:error];
 }
 
-- (void)sendRandom:(FlutterMethodCall*)call result:(FlutterResult)result {
+- (void)randomPayload:(FlutterMethodCall*)call result:(FlutterResult)result {
   if (![self isInitialised:call result:result]) return;
   NSData *payload = [self.chirp randomPayloadWithRandomLength];
   NSError *error = [self.chirp send:payload];
@@ -214,8 +214,8 @@
   else if ([@"send" isEqualToString:call.method]) {
     [self send:call result:result];
   }
-  else if ([@"sendRandom" isEqualToString:call.method]) {
-    [self sendRandom:call result:result];
+  else if ([@"randomPayload" isEqualToString:call.method]) {
+    [self randomPayload:call result:result];
   }
   else if ([@"getState" isEqualToString:call.method]) {
     [self getState:call result:result];

@@ -7,7 +7,7 @@
 @class ReceivingStreamHandler;
 @class ReceivedStreamHandler;
 
-@interface ChirpsdkPlugin : NSObject<FlutterPlugin>
+@interface ChirpFlutterPlugin : NSObject<FlutterPlugin>
 
 @property (nonatomic, strong) ChirpSDK *chirp;
 

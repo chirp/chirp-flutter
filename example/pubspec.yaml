@@ -1,9 +1,9 @@
-name: chirpsdk_example
-description: Demonstrates how to use the chirpsdk plugin.
+name: chirp_flutter_example
+description: Demonstrates how to use the chirp_flutter plugin.
 publish_to: 'none'
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -17,7 +17,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  chirpsdk:
+  chirp_flutter:
     path: ../
 
 flutter:

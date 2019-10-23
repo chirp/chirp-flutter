@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:chirpsdk/chirpsdk.dart';
+import 'package:chirp_flutter/chirp_flutter.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
 /// Enter Chirp application credentials below
@@ -51,7 +51,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
       // Get and print SDK version
       final String chirpVersion = await ChirpSDK.version;
       setState(() {
-        _chirpVersion = "ChirpSDK: $chirpVersion";
+        _chirpVersion = "$chirpVersion";
       });
 
       // Set SDK config
@@ -59,7 +59,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
       _setChirpCallbacks();
 
     } catch (err) {
-      setErrorMessage("ChirpError: ${err.code} - ${err.message}");
+      setErrorMessage("Error initialising Chirp.\n${err.message}");
     }
   }
 
@@ -72,7 +72,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         _stopSDK();
       }
     } catch (err) {
-      setErrorMessage("ChirpError: ${err.message};");
+      setErrorMessage("${err.message}");
     }
   }
 
@@ -83,7 +83,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         _startStopBtnText = "STOP";
       });
     } catch (err) {
-      setErrorMessage("Error starting the SDK: ${err.message};");
+      setErrorMessage("Error starting the SDK.\n${err.message};");
     }
   }
 
@@ -94,7 +94,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         _startStopBtnText = "START";
       });
     } catch (err) {
-      setErrorMessage("Error stopping the SDK: ${err.message};");
+      setErrorMessage("Error stopping the SDK.\n${err.message};");
     }
   }
 
@@ -131,11 +131,6 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
     ChirpSDK.onReceived.listen((e) {
       setState(() {
         _chirpData = e.payload;
-      });
-    });
-    ChirpSDK.onError.listen((e) {
-      setState(() {
-        _chirpErrors = e.message;
       });
     });
   }
@@ -183,7 +178,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         appBar: AppBar(
           backgroundColor: chirpYellow,
           title: const Text(
-            'Flutter - ChirpSDK Demo',
+            'Chirp Flutter - Demo',
             style: TextStyle(fontFamily: 'MarkPro')
           ),
         ),
