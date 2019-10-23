@@ -1,3 +1,3 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.example.chirp_flutter">
+  package="io.chirp.chirp_flutter">
 </manifest>
