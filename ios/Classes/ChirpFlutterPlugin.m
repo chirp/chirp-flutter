@@ -56,7 +56,7 @@
 - (void)handleError:(FlutterMethodCall*)call result:(FlutterResult)result withError:(NSError *)error {
   if (error) {
     result([FlutterError errorWithCode:[NSString stringWithFormat:@"%ld", (long)error.code]
-                               message:error.description
+                               message:error.localizedDescription
                                details:nil]);
   } else {
     result(nil);
@@ -140,7 +140,7 @@
   NSError *error = [self.chirp setConfig:config];
   if (error) {
     result([FlutterError errorWithCode:[NSString stringWithFormat:@"%ld", (long)error.code]
-                               message:error.description
+                               message:error.localizedDescription
                                details:nil]);
   } else {
     [self setCallbacks];
@@ -170,8 +170,7 @@
 - (void)randomPayload:(FlutterMethodCall*)call result:(FlutterResult)result {
   if (![self isInitialised:call result:result]) return;
   NSData *payload = [self.chirp randomPayloadWithRandomLength];
-  NSError *error = [self.chirp send:payload];
-  [self handleError:call result:result withError:error];
+  result([FlutterStandardTypedData typedDataWithBytes:payload]);
 }
 
 - (void)getState:(FlutterMethodCall*)call result:(FlutterResult)result {

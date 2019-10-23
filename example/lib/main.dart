@@ -38,11 +38,6 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
     });
   }
 
-  void setErrorCode(int errorCode) async {
-    var errorMessage = await ChirpSDK.errorCodeToString(errorCode);
-    setErrorMessage(errorMessage);
-  }
-
   Future<void> _initChirp() async {
     try {
       // Init ChirpSDK
@@ -102,11 +97,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
     try {
       Uint8List payload = await ChirpSDK.randomPayload();
       setPayload(payload);
-      var errorCode = await ChirpSDK.send(payload);
-      if (errorCode > 0) {
-        setErrorCode(errorCode);
-        return;
-      }
+      await ChirpSDK.send(payload);
     } catch (err) {
       setErrorMessage("Error sending random payload: ${err.message};");
     }
