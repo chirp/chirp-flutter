@@ -138,14 +138,10 @@
   if (![self isInitialised:call result:result]) return;
   NSString *config = call.arguments;
   NSError *error = [self.chirp setConfig:config];
-  if (error) {
-    result([FlutterError errorWithCode:[NSString stringWithFormat:@"%ld", (long)error.code]
-                               message:error.localizedDescription
-                               details:nil]);
-  } else {
+  if (!error) {
     [self setCallbacks];
-    result(nil);
   }
+  [self handleError:call result:result withError:error];
 }
 
 - (void)start:(FlutterMethodCall*)call result:(FlutterResult)result {
