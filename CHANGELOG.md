@@ -1,6 +1,6 @@
 # Chirp for Flutter
 
-## 1.0.0 - beta
+## 1.0.0 - 24/10/19
 
 - Rename package to `chirp_flutter`
 - Update error handling to use `try/catch`
