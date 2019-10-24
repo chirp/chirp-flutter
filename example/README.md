@@ -1,6 +1,6 @@
-# ChirpSDK Example
+# Chirp Flutter Example
 
-Demonstrates how to use the ChirpSDK plugin.
+Demonstrates how to use the Chirp Flutter plugin.
 
 ## Getting Started
 

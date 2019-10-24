@@ -23,8 +23,6 @@ class ChirpSDK {
       const EventChannel('chirp.io/events/receiving');
   static const EventChannel _receivedEvents =
       const EventChannel('chirp.io/events/received');
-  static const EventChannel _errorEvents =
-      const EventChannel('chirp.io/events/errors');
 
   /// Initialise the ChirpSDK
   ///
@@ -136,11 +134,6 @@ class ChirpSDK {
     return _receivedEvents.receiveBroadcastStream().map(_dataEvent);
   }
 
-  /// Returns stream of events when an error has occurred
-  static Stream<ChirpErrorEvent> get onError {
-    return _errorEvents.receiveBroadcastStream().map(_errorEvent);
-  }
-
   static ChirpStateEvent _stateEvent(dynamic map) {
     if (map is Map) {
       return new ChirpStateEvent(ChirpState.values[map['previous']],
@@ -156,12 +149,6 @@ class ChirpSDK {
     return null;
   }
 
-  static ChirpErrorEvent _errorEvent(dynamic map) {
-    if (map is Map) {
-      return new ChirpErrorEvent(map['code'], map['message']);
-    }
-    return null;
-  }
 }
 
 class ChirpStateEvent {

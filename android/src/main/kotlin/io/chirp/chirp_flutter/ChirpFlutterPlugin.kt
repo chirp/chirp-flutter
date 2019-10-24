@@ -1,4 +1,4 @@
-package io.chirp.chirpsdk
+package io.chirp.chirp_flutter
 
 import android.app.Activity
 
@@ -11,20 +11,20 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
+import io.chirp.chirpsdk.ChirpSDK
 import io.chirp.chirpsdk.interfaces.ChirpEventListener
 import io.chirp.chirpsdk.models.ChirpSDKState
 import io.chirp.chirpsdk.models.ChirpError
 import io.chirp.chirpsdk.models.ChirpErrorCode
 
 
-class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
+class ChirpFlutterPlugin(private val activity: Activity) : MethodCallHandler {
 
   val stateStreamHandler = StateStreamHandler()
   val sendingStreamHandler = SendingStreamHandler()
   val sentStreamHandler = SentStreamHandler()
   val receivingStreamHandler = ReceivingStreamHandler()
   val receivedStreamHandler = ReceivedStreamHandler()
-  val errorStreamHandler = ErrorStreamHandler()
 
   lateinit var chirpSDK: ChirpSDK
 
@@ -32,7 +32,7 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
 
     @JvmStatic
     fun registerWith(registrar: Registrar) {
-      val instance = ChirpsdkPlugin(registrar.activity())
+      val instance = ChirpFlutterPlugin(registrar.activity())
       val methodChannel = MethodChannel(registrar.messenger(), "chirp.io/methods")
       methodChannel.setMethodCallHandler(instance)
       val stateChannel = EventChannel(registrar.messenger(), "chirp.io/events/state")
@@ -45,8 +45,6 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
       receivingChannel.setStreamHandler(instance.receivingStreamHandler)
       val receivedChannel = EventChannel(registrar.messenger(), "chirp.io/events/received")
       receivedChannel.setStreamHandler(instance.receivedStreamHandler)
-      val errorsChannel = EventChannel(registrar.messenger(), "chirp.io/events/errors")
-      errorsChannel.setStreamHandler(instance.errorStreamHandler)
     }
   }
 
@@ -64,7 +62,11 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
     val appKey = arguments["key"] as String
     val appSecret = arguments["secret"] as String
     chirpSDK = ChirpSDK(activity, appKey, appSecret)
-    result.success(ChirpErrorCode.CHIRP_SDK_OK.code)
+    if (chirpSDK == null) {
+      result.error("-1", "Failed to initialise ChirpSDK", null)
+    } else {
+      result.success(ChirpErrorCode.CHIRP_SDK_OK.code)
+    }
   }
 
   private fun version(call: MethodCall, result: Result) {
@@ -133,8 +135,8 @@ class ChirpsdkPlugin(private val activity: Activity) : MethodCallHandler {
       result.error(error.code.toString(), error.message, null)
       return
     }
-    result.success(error.code)
     setCallbacks()
+    result.success(error.code)
   }
 
   private fun start(call: MethodCall, result: Result) {
@@ -306,23 +308,6 @@ class ReceivedStreamHandler : StreamHandler {
   fun send(data: ByteArray?, channel: Int) {
     eventSink?.success(mapOf("data" to data,
                              "channel" to channel))
-  }
-
-  override fun onCancel(arguments: Any?) {
-    eventSink = null
-  }
-}
-
-class ErrorStreamHandler : StreamHandler {
-  private var eventSink: EventSink? = null
-
-  override fun onListen(arguments: Any?, sink: EventSink) {
-    eventSink = sink
-  }
-
-  fun send(code: Int, message: String) {
-    eventSink?.success(mapOf("code" to code,
-                             "message" to message))
   }
 
   override fun onCancel(arguments: Any?) {

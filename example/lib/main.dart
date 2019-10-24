@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:chirpsdk/chirpsdk.dart';
+import 'package:chirp_flutter/chirp_flutter.dart';
 import 'package:simple_permissions/simple_permissions.dart';
 
 /// Enter Chirp application credentials below
@@ -38,28 +38,23 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
     });
   }
 
-  void setErrorCode(int errorCode) async {
-    var errorMessage = await ChirpSDK.errorCodeToString(errorCode);
-    setErrorMessage(errorMessage);
-  }
-
   Future<void> _initChirp() async {
     try {
-      //Init ChirpSDK
+      // Init ChirpSDK
       await ChirpSDK.init(_appKey, _appSecret);
 
-      //Get and print SDK version
+      // Get and print SDK version
       final String chirpVersion = await ChirpSDK.version;
       setState(() {
-        _chirpVersion = "chirpVersion: $chirpVersion";
+        _chirpVersion = "$chirpVersion";
       });
 
-      //Set SDK config
+      // Set SDK config
       await ChirpSDK.setConfig(_appConfig);
       _setChirpCallbacks();
 
     } catch (err) {
-      setErrorMessage("Error catched with code: ${err.code}; and message: ${err.message};");
+      setErrorMessage("Error initialising Chirp.\n${err.message}");
     }
   }
 
@@ -72,7 +67,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         _stopSDK();
       }
     } catch (err) {
-      setErrorMessage("Error sending random payload: ${err.message};");
+      setErrorMessage("${err.message}");
     }
   }
 
@@ -83,7 +78,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         _startStopBtnText = "STOP";
       });
     } catch (err) {
-      setErrorMessage("Error starting the SDK: ${err.message};");
+      setErrorMessage("Error starting the SDK.\n${err.message};");
     }
   }
 
@@ -94,7 +89,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         _startStopBtnText = "START";
       });
     } catch (err) {
-      setErrorMessage("Error stopping the SDK: ${err.message};");
+      setErrorMessage("Error stopping the SDK.\n${err.message};");
     }
   }
 
@@ -102,11 +97,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
     try {
       Uint8List payload = await ChirpSDK.randomPayload();
       setPayload(payload);
-      var errorCode = await ChirpSDK.send(payload);
-      if (errorCode > 0) {
-        setErrorCode(errorCode);
-        return;
-      }
+      await ChirpSDK.send(payload);
     } catch (err) {
       setErrorMessage("Error sending random payload: ${err.message};");
     }
@@ -131,11 +122,6 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
     ChirpSDK.onReceived.listen((e) {
       setState(() {
         _chirpData = e.payload;
-      });
-    });
-    ChirpSDK.onError.listen((e) {
-      setState(() {
-        _chirpErrors = e.message;
       });
     });
   }
@@ -183,7 +169,7 @@ class _ChirpAppState extends State<ChirpApp> with WidgetsBindingObserver {
         appBar: AppBar(
           backgroundColor: chirpYellow,
           title: const Text(
-            'Flutter - ChirpSDK Demo',
+            'Chirp Flutter - Demo',
             style: TextStyle(fontFamily: 'MarkPro')
           ),
         ),

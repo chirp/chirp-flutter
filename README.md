@@ -1,4 +1,4 @@
-# ChirpSDK (Beta)
+# ChirpSDK
 
 Send data with sound.
 
@@ -9,9 +9,14 @@ Sign up at the Chirp [Developer Hub](https://developers.chirp.io/sign-up)
 Copy and paste your Chirp app key, secret and chosen configuration into the
 [example application](https://github.com/chirp/chirp-flutter/tree/master/example)
 
-    await ChirpSDK.init(_appKey, _appSecret);
-    await ChirpSDK.setConfig(_appConfig);
-    await ChirpSDK.start();
+    try {
+        await ChirpSDK.init(_appKey, _appSecret);
+        await ChirpSDK.setConfig(_appConfig);
+        await ChirpSDK.start();
+    } catch(err) {
+        errorMessage = "ChirpError: ${err.message}"
+    }
+
 
 Please see the [example](https://github.com/chirp/chirp-flutter/tree/master/example)
 for a more detailed run through of how to use the Chirp SDK.
@@ -35,12 +40,17 @@ Chirp SDKs accept data as an array of bytes, creating a versatile interface for 
 However in most cases, Chirp is used to send a short identifier. Here is an example of how to send
 a short string with the Chirp SDK.
 
-    String identifier = "hello";
-    var payload = new Uint8List.fromList(identifier.codeUnits);
-    await ChirpSDK.send(payload);
+    try {
+        String identifier = "hello";
+        var payload = new Uint8List.fromList(identifier.codeUnits);
+        await ChirpSDK.send(payload);
+    } catch(err) {
+        errorMessage = "ChirpError: ${err.message}"
+    }
+
 
 It is worth noting here that the send method will not block until the entire payload has been sent,
-but just as long as it takes to pass the message to the SDK. Please use the onSent callback for this
+but just as long as it takes to pass the message to the SDK. Please use the `onSent` callback for this
 purpose.
 
 ## Receiving
