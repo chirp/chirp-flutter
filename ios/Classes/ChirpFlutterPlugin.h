@@ -36,6 +36,6 @@
 @end
 
 @interface ReceivedStreamHandler : NSObject<FlutterStreamHandler>
-- (void)send:(FlutterStandardTypedData *)data channel:(NSNumber *)channel;
+- (void)send:(FlutterStandardTypedData * _Nullable)data channel:(NSNumber *)channel;
 @end
 

@@ -105,13 +105,18 @@
 
   [weakSelf.chirp setReceivedBlock:^(NSData * _Nullable data, NSUInteger channel)
    {
-     /*------------------------------------------------------------------------------
-      * receivedBlock is called when a receive event has completed.
-      * If the payload was decoded successfully, it is passed in data.
-      * Otherwise, data is null.
-      *----------------------------------------------------------------------------*/
-    [weakSelf.receivedStreamHandler send:[FlutterStandardTypedData typedDataWithBytes:data]
-                                 channel:[NSNumber numberWithInteger:channel]];
+      /*------------------------------------------------------------------------------
+       * receivedBlock is called when a receive event has completed.
+       * If the payload was decoded successfully, it is passed in data.
+       * Otherwise, data is null.
+       *----------------------------------------------------------------------------*/
+    if (data) {
+      [weakSelf.receivedStreamHandler send:[FlutterStandardTypedData typedDataWithBytes:data]
+                                   channel:[NSNumber numberWithInteger:channel]];
+    } else {
+      [weakSelf.receivedStreamHandler send:[NSNull null]
+                                   channel:[NSNumber numberWithInteger:channel]];
+    }
    }];
 }
 
@@ -347,7 +352,7 @@
   return nil;
 }
 
-- (void)send:(FlutterStandardTypedData *)data channel:(NSNumber *)channel {
+- (void)send:(FlutterStandardTypedData * _Nullable)data channel:(NSNumber *)channel {
   if (_eventSink) {
     NSDictionary *dictionary = @{ @"data": data, @"channel": channel };
     _eventSink(dictionary);

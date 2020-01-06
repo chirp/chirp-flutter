@@ -1,5 +1,9 @@
 # Chirp for Flutter
 
+## 1.0.1 - 07/01/20
+
+- Fix iOS failed decode bug
+
 ## 1.0.0 - 24/10/19
 
 - Rename package to `chirp_flutter`
