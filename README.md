@@ -1,4 +1,6 @@
-# ChirpSDK
+# DEPRECATED
+
+## This project is no longer actively maintained.
 
 Send data with sound - [chirp_flutter](https://pub.dev/packages/chirp_flutter)
 
